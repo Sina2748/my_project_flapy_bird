@@ -1,8 +1,30 @@
-import pygame, sys
+import pygame, sys, random
 
 def draw_floor():
     screen.blit(floor_surface, (floor_x_pos, 900))
     screen.blit(floor_surface, (floor_x_pos + 576, 900)) 
+
+def create_pipe():
+    random_pipe_pos = random.choice(pipe_hight)
+    bottom_pipe = pipe_surface.get_rect(midtop = (700, random_pipe_pos))
+    top_pipe = pipe_surface.get_rect(midbottom = (700, random_pipe_pos - 300))
+    return bottom_pipe, top_pipe
+    
+   
+def move_pipes(pipes):
+    for pipe in pipes:
+        pipe.centerx -= 5 
+    print(pipe_list)   
+    return pipes
+
+
+def draw_pipes(pipes):
+    for pipe in pipes:
+        if pipe.bottom >= 1024:
+            screen.blit(pipe_surface, pipe)
+        else:
+            flip_pipe = pygame.transform.flip(pipe_surface, False ,True)
+            screen.blit(flip_pipe, pipe)
 
 pygame.init()
 screen = pygame.display.set_mode((576,1024))
@@ -24,6 +46,13 @@ bird_suface = pygame.image.load('images/red_bird_mid_flap.png').convert()
 bird_surface = pygame.transform.scale2x(bird_suface)
 bird_rect = bird_surface.get_rect(center= (100, 512))
 
+pipe_surface = pygame.image.load('images/pipe_green.png').convert()
+pipe_surface = pygame.transform.scale2x(pipe_surface)
+pipe_list = []
+SPAWNPIPE = pygame.USEREVENT
+pygame.time.set_timer(SPAWNPIPE, 1200)
+pipe_hight = [400,600,800]
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -35,14 +64,22 @@ while True:
                 bird_movment = 0
                 bird_movment -= 12
 
+        if event.type == SPAWNPIPE: 
+            pipe_list.extend(create_pipe())
+            print(pipe_list)
 
     screen.blit(bg_surface, (0,0))
-
+    #bird
     bird_movment += gravity
     bird_rect.centery += bird_movment
-
     screen.blit(bird_surface, bird_rect)
     floor_x_pos -= 1
+
+    #pipes
+    pipe_list = move_pipes(pipe_list)
+    draw_pipes(pipe_list)
+
+    #floor
     draw_floor()
     if floor_x_pos <= -576:
         floor_x_pos = 0
