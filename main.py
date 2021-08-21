@@ -29,8 +29,10 @@ def draw_pipes(pipes):
 def check_collision(pipes):
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
+            can_score = True            
             return False
     if bird_rect.top <= -100 or bird_rect.bottom >= 900:
+        can_score = True        
         return False
     return True
 
@@ -43,9 +45,32 @@ def bird_animation():
     new_bird_rect = new_bird.get_rect(center = (100, bird_rect.centery))
     return new_bird, new_bird_rect
 
+def score_display():
+    score_surface = game_font.render(str(score), True, (255,255,255))
+    score_rect = score_surface.get_rect(center = (288,100))
+    screen.blit(score_surface, score_rect)
+
+def pipe_score_check():
+    global score, can_score
+    if pipe_list:
+        for pipe in pipe_list:
+            if 95 < pipe.centerx < 105 and can_score == True:
+                score += 1
+                can_score = False
+            if pipe.centerx > 105 :
+                can_score = True
+                
+
+
+
 pygame.init()
 screen = pygame.display.set_mode((576,1024))
 clock = pygame.time.Clock()
+game_active = False
+game_font = pygame.font.Font('04b_19.ttf',40)
+score = 0
+can_score = True
+
 
 #Game Variables
 gravity = 0.25
@@ -80,6 +105,8 @@ SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1200)
 pipe_hight = [400,600,800]
 
+game_over_surface = pygame.transform.scale2x(pygame.image.load('images/message.png').convert_alpha())
+game_over_rect = game_over_surface.get_rect(center= (288, 512))
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -89,10 +116,11 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and game_active == True:
                 bird_movment = 0
-                bird_movment -= 12
+                bird_movment -= 9
 
             if event.key == pygame.K_SPACE and game_active == False:
                 game_active = True
+                score = 0
                 pipe_list.clear()
                 bird_rect.center = (100, 512)
                 bird_movment = 0
@@ -121,7 +149,10 @@ while True:
         #pipes
         pipe_list = move_pipes(pipe_list)
         draw_pipes(pipe_list)
-
+        pipe_score_check()
+        score_display()
+    else:
+        screen.blit(game_over_surface, game_over_rect)
 
     #floor
     draw_floor()
