@@ -1,8 +1,15 @@
 import pygame, sys, random
 
-def draw_floor():
-    screen.blit(floor_surface, (floor_x_pos, 900))
-    screen.blit(floor_surface, (floor_x_pos + 576, 900)) 
+#----- floor -----#
+class Floor:
+    def __init__(self):
+        self.floor_surface = pygame.image.load('images/floor.png').convert()
+        self.floor_surface = pygame.transform.scale2x(self.floor_surface)
+        self.floor_x_pos = 0
+    def draw_floor(self):
+        screen.blit(self.floor_surface, (self.floor_x_pos, 900))
+        screen.blit(self.floor_surface, (self.floor_x_pos + 576, 900)) 
+
 
 def create_pipe():
     random_pipe_pos = random.choice(pipe_hight)
@@ -75,14 +82,11 @@ can_score = True
 #Game Variables
 gravity = 0.25
 bird_movment = 0
-game_active = True
+#game_active = True
 #bg
 bg_surface = pygame.image.load('images/bg1.png').convert()
 bg_surface = pygame.transform.scale2x(bg_surface)
-#floor
-floor_surface = pygame.image.load('images/floor.png').convert()
-floor_surface = pygame.transform.scale2x(floor_surface)
-floor_x_pos = 0
+
 #bird
 # bird_suface = pygame.image.load('images/red_bird_mid_flap.png').convert_alpha()
 # bird_surface = pygame.transform.scale2x(bird_suface)
@@ -107,6 +111,10 @@ pipe_hight = [400,600,800]
 
 game_over_surface = pygame.transform.scale2x(pygame.image.load('images/message.png').convert_alpha())
 game_over_rect = game_over_surface.get_rect(center= (288, 512))
+
+
+
+# ----- Game Loop
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -144,7 +152,7 @@ while True:
         rotated_bird = rotate_bird(bird_surface)
         bird_rect.centery += bird_movment
         screen.blit(rotated_bird, bird_rect)
-        floor_x_pos -= 1
+        floor.floor_x_pos -= 1
         game_active = check_collision(pipe_list)
         #pipes
         pipe_list = move_pipes(pipe_list)
@@ -155,9 +163,10 @@ while True:
         screen.blit(game_over_surface, game_over_rect)
 
     #floor
-    draw_floor()
-    if floor_x_pos <= -576:
-        floor_x_pos = 0
+    floor = Floor()
+    floor.draw_floor()
+    if floor.floor_x_pos <= -576:
+        floor.floor_x_pos = 0
 
     pygame.display.update()
     clock.tick(120)
